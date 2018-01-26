@@ -63,22 +63,31 @@ int main()
     std::string StereoMatchingImgPathCam3     = "..//Calibration//Cam130_3//StereoMatching//";
 
     /// Calib Cam1 to Cam2 ///
-    std::string CalibrateImgPathCalib1Cam2    = "..//Calibration//CamCalib1to2//CalibrateA//";
-    std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateB//";
+    std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateA//";
+    std::string CalibrateImgPathCalib1Cam2    = "..//Calibration//CamCalib1to2//CalibrateB//";
     std::string StereoCalibrateImgPathCam1to2 = "..//Calibration//CamCalib1to2//CalibrateStereo//";
     std::string StereoMatchingImgPathCam1to2  = "..//Calibration//CamCalib1to2//StereoMatching//";
 
+    std::string RectifyCalib1LeftCamPath      = "..//Calibration//Cam130_1//CalibrateStereo//";
+    std::string RectifyCalib1RightCamPath     = "..//Calibration//Cam130_2//CalibrateStereo//";
+
     /// Calib Cam3 to Cam2 ///
-    std::string CalibrateImgPathCalib2Cam2    = "..//Calibration//CamCalib3to2//CalibrateA//";
-    std::string CalibrateImgPathCalib2Cam3    = "..//Calibration//CamCalib3to2//CalibrateB//";
+    std::string CalibrateImgPathCalib2Cam3    = "..//Calibration//CamCalib3to2//CalibrateA//";
+    std::string CalibrateImgPathCalib2Cam2    = "..//Calibration//CamCalib3to2//CalibrateB//";
     std::string StereoCalibrateImgPathCam3to2 = "..//Calibration//CamCalib3to2//CalibrateStereo//";
     std::string StereoMatchingImgPathCam3to2  = "..//Calibration//CamCalib3to2//StereoMatching//";
 
+    std::string RectifyCalib2LeftCamPath      = "..//Calibration//Cam130_3//CalibrateStereo//";
+    std::string RectifyCalib2RightCamPath     = "..//Calibration//Cam130_2//CalibrateStereo//";
+
     /// Calib Cam1 to Cam3 ///
-    std::string CalibrateImgPathCalib3Cam3    = "..//Calibration//CamCalib1to3//CalibrateA//";
-    std::string CalibrateImgPathCalib3Cam1    = "..//Calibration//CamCalib1to3//CalibrateB//";
+    std::string CalibrateImgPathCalib3Cam1    = "..//Calibration//CamCalib1to3//CalibrateA//";
+    std::string CalibrateImgPathCalib3Cam3    = "..//Calibration//CamCalib1to3//CalibrateB//";
     std::string StereoCalibrateImgPathCam1to3 = "..//Calibration//CamCalib1to3//CalibrateStereo//";
     std::string StereoMatchingImgPathCam1to3  = "..//Calibration//CamCalib1to3//StereoMatching//";
+
+    std::string RectifyCalib3LeftCamPath      = "..//Calibration//Cam130_1//CalibrateStereo//";
+    std::string RectifyCalib3RightCamPath     = "..//Calibration//Cam130_3//CalibrateStereo//";
 
 
     std::string ImgFormat = ".png";
@@ -101,7 +110,7 @@ int main()
     bool OpenCamera         = true;
     bool DebugMode          = false;
     bool DoCamerCalibration = true;
-    bool CaputureImgs       = false;
+    bool CaputureImgs       = true;
 
     CalibrationBoard CircleBoard(PointsCols,PointsRows,CircleDistWidth,CircleDistHeight,BoardWidth,BoardHeight,CircleDiameter);
 
@@ -241,7 +250,6 @@ int main()
             StereoSystem StereoCam1Cam2(&Calib1Cam1R, &Calib1Cam2R, StereoCalibrateImgPathCam1to2,
                                         StereoMatchingImgPathCam1to2, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
-
             if (DoCamerCalibration)
             {
                 if (CaputureImgs) {
@@ -254,15 +262,15 @@ int main()
                     StereoCam1Cam2.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-                StereoCam1Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
-                StereoCam1Cam2.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+//                StereoCam1Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+//                StereoCam1Cam2.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+
+                StereoCam1Cam2.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib1LeftCamPath);
+                StereoCam1Cam2.LoadRectifyRightCamInfo(LeftRight, RectifyCalib1RightCamPath);
+
                 ////  Stereo Camera Calibration  /////
                 StereoCam1Cam2.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
-
-            StereoCam1Cam2.LoadStereoCamInfo(LeftRight);
-            int WorkingDistCam1Cam2[2] = {MinDist, MinDist + WorkingRange};
-            StereoCam1Cam2.Compute3DMap(WorkingDistCam1Cam2, LeftRight, DebugMode, SADWindowSize, TextureThreshold);
         }
             break;
 
@@ -275,11 +283,9 @@ int main()
                                CalibrateImgPathCalib2Cam2, ImgFormat);    ///initialize camera2
             Calib2Cam3R.Initialize();
             Calib2Cam2R.Initialize();
-
             StereoSystem StereoCam3Cam2(&Calib2Cam3R, &Calib2Cam2R, StereoCalibrateImgPathCam3to2,
                                         StereoMatchingImgPathCam3to2, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
-
             if (DoCamerCalibration)
             {
                 if (CaputureImgs)
@@ -293,15 +299,15 @@ int main()
                     StereoCam3Cam2.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-                StereoCam3Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
-                StereoCam3Cam2.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+                StereoCam3Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+                StereoCam3Cam2.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+
+                StereoCam3Cam2.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib2LeftCamPath);
+                StereoCam3Cam2.LoadRectifyRightCamInfo(LeftRight, RectifyCalib2RightCamPath);
+
                 ////  Stereo Camera Calibration  /////
                 StereoCam3Cam2.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
-
-            StereoCam3Cam2.LoadStereoCamInfo(LeftRight);
-            int WorkingDistCam3Cam2[2] = {MinDist, MinDist + WorkingRange};
-            StereoCam3Cam2.Compute3DMap(WorkingDistCam3Cam2, LeftRight, DebugMode, SADWindowSize, TextureThreshold);
         }
             break;
 
@@ -318,7 +324,6 @@ int main()
             StereoSystem StereoCam1Cam3(&Calib3Cam1R, &Calib3Cam3R, StereoCalibrateImgPathCam1to3,
                                         StereoMatchingImgPathCam1to3, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
-
             if (DoCamerCalibration)
             {
                 if (CaputureImgs)
@@ -332,15 +337,15 @@ int main()
                     StereoCam1Cam3.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-                StereoCam1Cam3.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
-                StereoCam1Cam3.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+//                StereoCam1Cam3.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+//                StereoCam1Cam3.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
+
+                StereoCam1Cam3.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib3LeftCamPath);
+                StereoCam1Cam3.LoadRectifyRightCamInfo(LeftRight, RectifyCalib3RightCamPath);
+
                 ////  Stereo Camera Calibration  /////
                 StereoCam1Cam3.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
-
-            StereoCam1Cam3.LoadStereoCamInfo(LeftRight);
-            int WorkingDistCam1Cam3[2] = {MinDist, MinDist + WorkingRange};
-            StereoCam1Cam3.Compute3DMap(WorkingDistCam1Cam3, LeftRight, DebugMode, SADWindowSize, TextureThreshold);
         }
             break;
 

@@ -99,12 +99,13 @@ void StereoSystem::UpdateMinDist(int MinDist, void*)
     int mindisp = disp1;
     bm.state->minDisparity = mindisp-xd;
     bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
-
     DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
-    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
-    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
-    dispsbm8.convertTo(dispsbm8, CV_8UC1);
-    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
+
+//    DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
+//    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
+//    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
+//    dispsbm8.convertTo(dispsbm8, CV_8UC1);
+//    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
 
 }
 
@@ -119,12 +120,13 @@ void StereoSystem::UpdateWorkingRange(int WorkingRange, void*)
     int mindisp = disp1;
     bm.state->minDisparity = mindisp-xd;
     bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
-
     DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
-    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
-    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
-    dispsbm8.convertTo(dispsbm8, CV_8UC1);
-    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
+
+//    DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
+//    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
+//    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
+//    dispsbm8.convertTo(dispsbm8, CV_8UC1);
+//    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
 }
 
 
@@ -212,12 +214,47 @@ void StereoSystem::AdjustCameraFocus()
         }
     }
 
-    AdjustLeftCamExposure (CamLeft->ExposureTime,   0);
-    AdjustRightCamExposure(CamRight->ExposureTime,  0);
+    AdjustLeftCamExposure (CamLeft->ExposureTime,  0);
+    AdjustRightCamExposure(CamRight->ExposureTime, 0);
 
     cv::destroyWindow(HandleLeft);
     cv::destroyWindow(HandleRight);
     return void();
+}
+
+
+void StereoSystem::LoadRectifyLeftCamInfo(bool LeftRight, std::string ImgPath)
+{
+    std::string CamNameLeftSave = std::string(CamLeft->CamName);
+    std::string PathLoad;
+
+    if (LeftRight)
+    {PathLoad = ImgPath+"LeftRight/";}
+    else
+    {PathLoad = ImgPath+"RightLeft/";}
+
+    loadXmlFile(CamLeft->intrinsicMatrix,"IntrinsicMatrix"+CamNameLeftSave,".xml",PathLoad);
+    loadXmlFile(CamLeft->distortionMatrix,"DistortionMatrix"+CamNameLeftSave,".xml",PathLoad);
+    loadXmlFile(RR,"RR",".xml",PathLoad);
+    loadXmlFile(PR,"PR",".xml",PathLoad);
+
+}
+
+
+void StereoSystem::LoadRectifyRightCamInfo(bool LeftRight, std::string ImgPath)
+{
+    std::string CamNameRightSave = std::string(CamRight->CamName);
+    std::string PathLoad;
+
+    if (LeftRight)
+    {PathLoad = ImgPath+"LeftRight/";}
+    else
+    {PathLoad = ImgPath+"RightLeft/";}
+
+    loadXmlFile(CamRight->intrinsicMatrix,"IntrinsicMatrix"+CamNameRightSave,".xml",PathLoad);
+    loadXmlFile(CamRight->distortionMatrix,"DistortionMatrix"+CamNameRightSave,".xml",PathLoad);
+    loadXmlFile(RR,"RR",".xml",PathLoad);
+    loadXmlFile(PR,"PR",".xml",PathLoad);
 }
 
 
@@ -248,6 +285,14 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
     CamRightCornersAll.clear();
     ObjVectorAll.clear();
 
+    //////
+
+    cv::initUndistortRectifyMap(CamLeft->intrinsicMatrix,CamLeft->distortionMatrix, RL,PL,ImgSize, CV_16SC2, ReMapLeftX,ReMapLeftY);
+    cv::initUndistortRectifyMap(CamRight->intrinsicMatrix,CamRight->distortionMatrix, RR, PR,ImgSize, CV_16SC2,ReMapRightX,ReMapRightY);
+
+
+
+    //////
     if(CaputureImgs)
     {
         std::cout<<"Press 'Esc' to stop capturing image"<<std::endl;
@@ -259,10 +304,21 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
 
             CamLeft->CapImage();
             CamRight->CapImage();
-            cv::imshow(HandleLeft, CamLeft->frame);
-            cv::imshow(HandleRight, CamRight->frame);
+
+            ///
+            cv::remap(CamLeft->frame, RectifyLeft, ReMapLeftX, ReMapLeftY, CV_INTER_LINEAR);
+            cv::remap(CamRight->frame, RectifyRight, ReMapRightX,ReMapRightY, CV_INTER_LINEAR);
+
+
+
+            cv::imshow(HandleLeft, RectifyLeft);
+            cv::imshow(HandleRight, RectifyRight);
+
+
+            ///
+
             key = cv::waitKey(1);
-            if ((CamLeft->frame.data == NULL)|(CamRight->frame.data == NULL))
+            if ((RectifyLeft.data == NULL)|(RectifyRight.data == NULL))
             {
                 std::cout<<"img is None"<<std::endl;
             }
@@ -274,23 +330,23 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
             if ((key & 255) == 99)      /////  c    start capture images
             {
                 std::cout<<"Start detect Camera "+CamNameLeftSave+" Calibration Board No."<<success<<std::endl;
-                BoardFound=Board.ExtractBoardCoordinate(CamLeft->frame,BoardMarker,CamLeftCorners);
+                BoardFound=Board.ExtractBoardCoordinate(RectifyLeft,BoardMarker,CamLeftCorners);
                 if (BoardFound==false)
                 {
                     std::cout<<CamNameLeftSave+" Image No."<<success<<" can not find a calibration board!!!!!"<<std::endl;
-                    saveMat(CamLeft->frame,ImgPath+CamLeft->CamName+"_StereoDraw_",success,ImgFormat);
-                    cv::imwrite(ImgPath+"CanNotDetectImg"+ImgFormat,CamLeft->frame);
+                    saveMat(RectifyLeft,ImgPath+CamLeft->CamName+"_StereoDraw_",success,ImgFormat);
+                    cv::imwrite(ImgPath+"CanNotDetectImg"+ImgFormat,RectifyLeft);
 
                 }
                 else
                 {
-                    if (CamLeft->frame.channels()==1)
+                    if (RectifyLeft.channels()==1)
                     {
-                        cv::cvtColor(CamLeft->frame, frameClrLeft, CV_GRAY2BGR);
+                        cv::cvtColor(RectifyLeft, frameClrLeft, CV_GRAY2BGR);
                     }
                     else
                     {
-                        CamLeft->frame.copyTo(frameClrLeft);
+                        RectifyLeft.copyTo(frameClrLeft);
                     }
                     cv::drawChessboardCorners(frameClrLeft, Board.BoardSize, CamLeftCorners,BoardFound);
                     cv::circle(frameClrLeft,BoardMarker,1,cv::Scalar(0,0,255),3,8,0);
@@ -300,21 +356,21 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
                     if (((key&255) == 10)||((key&255) == 141))            /////////////////// Enter
                     {
                         std::cout<<"Start detect Camera "+CamNameRightSave+" Calibration Board No."<<success<<std::endl;
-                        BoardFound=Board.ExtractBoardCoordinate(CamRight->frame,BoardMarker,CamRightCorners);
+                        BoardFound=Board.ExtractBoardCoordinate(RectifyRight,BoardMarker,CamRightCorners);
                         if (BoardFound==false)
                         {
                             std::cout<<CamNameRightSave+" Image No."<<success<<" can not find a calibration board!!!!!"<<std::endl;
-                            cv::imwrite(ImgPath+"CanNotDetectImg"+ImgFormat,CamRight->frame);
+                            cv::imwrite(ImgPath+"CanNotDetectImg"+ImgFormat,RectifyRight);
                         }
                         else
                         {
-                            if (CamRight->frame.channels() == 1)
+                            if (RectifyRight.channels() == 1)
                             {
-                                cv::cvtColor(CamRight->frame, frameClrRight, CV_GRAY2BGR);
+                                cv::cvtColor(RectifyRight, frameClrRight, CV_GRAY2BGR);
                             }
                             else
                             {
-                                CamRight->frame.copyTo(frameClrRight);
+                                RectifyRight.copyTo(frameClrRight);
                             }
                             cv::drawChessboardCorners(frameClrRight, Board.BoardSize, CamRightCorners, BoardFound);
                             cv::circle(frameClrRight, BoardMarker, 1, cv::Scalar(0, 0, 255), 3, 8, 0);
@@ -324,10 +380,10 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
                             if (((key&255) == 10)||((key&255) == 141))            /////////////////// Enter
                             {
                                 std::cout<<"Saving this image,press 'c' to capture another one..."<<std::endl;
-                                saveMat(CamLeft->frame,ImgPath+CamLeft->CamName+"_Stereo_",success,ImgFormat);  //+"CalibrateImages_"
+                                saveMat(RectifyLeft,ImgPath+CamLeft->CamName+"_Stereo_",success,ImgFormat);  //+"CalibrateImages_"
                                 saveMat(frameClrLeft,ImgPath+CamLeft->CamName+"_StereoDraw_",success,ImgFormat);
 
-                                saveMat(CamRight->frame,ImgPath+CamRight->CamName+"_Stereo_",success,ImgFormat);
+                                saveMat(RectifyRight,ImgPath+CamRight->CamName+"_Stereo_",success,ImgFormat);
                                 saveMat(frameClrRight,ImgPath+CamRight->CamName+"_StereoDraw_",success,ImgFormat);
                                 CamLeftCornersAll.push_back(CamLeftCorners);
                                 CamRightCornersAll.push_back(CamRightCorners);
