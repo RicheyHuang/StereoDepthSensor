@@ -14,7 +14,8 @@ StereoSystem::StereoSystem(CamSys* CamLeft,
                            int MaxSADWindowSize,
                            int MaxValForMinDist,
                            int MaxWorkingRange,
-                           int MaxTextureThreshold):
+                           int MaxTextureThreshold,
+                           int MaxUniquenessRatio):
                            CamLeft(CamLeft),
                            CamRight(CamRight),
                            ImgPath(ImgPath),
@@ -24,7 +25,8 @@ StereoSystem::StereoSystem(CamSys* CamLeft,
                            MaxSADWindowSize(MaxSADWindowSize),
                            MaxValForMinDist(MaxValForMinDist),
                            MaxWorkingRange(MaxWorkingRange),
-                           MaxTextureThreshold(MaxTextureThreshold)
+                           MaxTextureThreshold(MaxTextureThreshold),
+                           MaxUniquenessRatio(MaxUniquenessRatio)
 {
 
 }
@@ -76,6 +78,12 @@ void StereoSystem::onChangeTextureThresh(int TextureThresh, void *ptr)
     texthresh->UpdateTextureThresh(TextureThresh, 0);
 }
 
+void StereoSystem::onChangeUniquenessRatio(int UniquenessRatio, void *ptr)
+{
+    StereoSystem *uniquenessratio = (StereoSystem*) ptr;
+    uniquenessratio->UpdateUniquenessRatio(UniquenessRatio, 0);
+}
+
 
 void StereoSystem::UpdateSADWindowSize(int SADWindowSize, void*)
 {
@@ -90,9 +98,15 @@ void StereoSystem::UpdateTextureThresh(int TextureThresh, void *)
     bm.state->textureThreshold =TextureThresh;
 }
 
+void StereoSystem::UpdateUniquenessRatio(int UniquenessRatio, void *)
+{
+    bm.state->uniquenessRatio =UniquenessRatio;
+}
+
 void StereoSystem::UpdateMinDist(int MinDist, void*)
 {
     WorkingDistance[0] = MinDist;
+
     int disp1 = -PL.at<double>(0,3)/WorkingDistance[0];
     int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
     int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
@@ -588,12 +602,13 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
     bool GetImgError = false;
     int key;
     CreateImgWindow(HandleLeft,ImgSize,HandleRight,ImgSize,HandleDepthMap,DepthMapSize,0.95);
-    cv::createTrackbar("ExposureTime：",     HandleLeft,     &CamLeft->ExposureTime,      CamLeft->MaxExposureTime,  onChangeLeftCam,       this);
-    cv::createTrackbar("ExposureTime：",     HandleRight,    &CamRight->ExposureTime,     CamRight->MaxExposureTime, onChangeRightCam,      this);
-    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &bm.state->SADWindowSize,    MaxSADWindowSize,          onChangeSADWinSize,    this);
-    cv::createTrackbar("MinDistance：",      HandleDepthMap, &WorkingDistance[0],         MaxValForMinDist,          onChangeMinDist,       this);
-    cv::createTrackbar("WorkingRange：",     HandleDepthMap, &CamWorkingRange,            MaxWorkingRange,           onChangeWorkRange,     this);
-    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &bm.state->textureThreshold, MaxTextureThreshold,       onChangeTextureThresh, this);
+    cv::createTrackbar("ExposureTime：",     HandleLeft,     &CamLeft->ExposureTime,      CamLeft->MaxExposureTime,  onChangeLeftCam,         this);
+    cv::createTrackbar("ExposureTime：",     HandleRight,    &CamRight->ExposureTime,     CamRight->MaxExposureTime, onChangeRightCam,        this);
+    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &bm.state->SADWindowSize,    MaxSADWindowSize,          onChangeSADWinSize,      this);
+    cv::createTrackbar("MinDistance：",      HandleDepthMap, &WorkingDistance[0],         MaxValForMinDist,          onChangeMinDist,         this);
+    cv::createTrackbar("WorkingRange：",     HandleDepthMap, &CamWorkingRange,            MaxWorkingRange,           onChangeWorkRange,       this);
+    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &bm.state->textureThreshold, MaxTextureThreshold,       onChangeTextureThresh,   this);
+    cv::createTrackbar("UniquenessRatio：",  HandleDepthMap, &bm.state->uniquenessRatio,  MaxUniquenessRatio,        onChangeUniquenessRatio, this);
 
     while(true)
     {
@@ -664,10 +679,11 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
     AdjustLeftCamExposure (CamLeft->ExposureTime,   0);
     AdjustRightCamExposure(CamRight->ExposureTime,  0);
-    UpdateSADWindowSize(bm.state->SADWindowSize,    0);
-    UpdateMinDist      (WorkingDistance[0],         0);
-    UpdateWorkingRange (CamWorkingRange,            0);
-    UpdateTextureThresh(bm.state->textureThreshold, 0);
+    UpdateSADWindowSize   (bm.state->SADWindowSize,    0);
+    UpdateMinDist         (WorkingDistance[0],         0);
+    UpdateWorkingRange    (CamWorkingRange,            0);
+    UpdateTextureThresh   (bm.state->textureThreshold, 0);
+    UpdateUniquenessRatio (bm.state->uniquenessRatio, 0);
 
 
 }

@@ -29,6 +29,7 @@ public:
     int MaxValForMinDist;
     int MaxWorkingRange;
     int MaxTextureThreshold;
+    int MaxUniquenessRatio;
 
     cv::Mat ReMapLeftX;
     cv::Mat ReMapLeftY;
@@ -52,10 +53,11 @@ public:
     static void onChangeMinDist(int MinDist,void *ptr);
     static void onChangeWorkRange(int WorkingRange, void *ptr);
     static void onChangeTextureThresh(int TextureThresh, void *ptr);
+    static void onChangeUniquenessRatio(int UniquenessRatio, void *ptr);
 
 public:
     StereoSystem(CamSys* CamLeft,CamSys* CamRight,std::string ImgPath,std::string ImgPathMatch,std::string ImgFormat,
-                 int MaxSADWindowSize, int MaxValForMinDist, int MaxWorkingRange, int MaxTextureThreshold);
+                 int MaxSADWindowSize, int MaxValForMinDist, int MaxWorkingRange, int MaxTextureThreshold, int MaxUniquenessRatio);
     bool SelectCamDirection();
     void AdjustCameraFocus();
     void StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool CaputureImgs);
@@ -70,6 +72,7 @@ public:
     void UpdateMinDist(int MinDist, void*);
     void UpdateWorkingRange(int WorkingRange, void*);
     void UpdateTextureThresh(int TextureThresh, void*);
+    void UpdateUniquenessRatio(int UniquenessRatio, void*);
 
 };
 

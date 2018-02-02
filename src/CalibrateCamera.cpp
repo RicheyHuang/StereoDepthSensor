@@ -13,16 +13,20 @@
 #define CAMERA_CALIB_CAM1_TO_CAM2 4;
 #define CAMERA_CALIB_CAM3_TO_CAM2 5;
 #define CAMERA_CALIB_CAM1_TO_CAM3 6;
+#define CAMERA_GROUP_TEST  7;
 
 /// The code below uses left cam as the reference ///
 
 int main()
 {
-    int UsingCamGroup = CAMERA_CALIB_CAM1_TO_CAM3;
+    int UsingCamGroup = CAMERA_GROUP_TEST;
 
     /// Parameters adjusted by trackbar ///
     int ImageWidth  = 1280;
     int ImageHeight = 720;
+
+//    int ImageWidth  = 3664;
+//    int ImageHeight = 2748;
 
     int ExposureTimeLeftCam  = 18000;
     int ExposureTimeRightCam = 18000;
@@ -37,6 +41,7 @@ int main()
 
     int TextureThreshold     = 5000;
     int MaxTextureThreshold  = 10000;
+    int MaxUniquenessRatio   = 100;
 
     /// Cam Group1 ///
     char *CamName1L = "Cam130_1L";
@@ -62,6 +67,14 @@ int main()
     std::string StereoCalibrateImgPathCam3    = "..//Calibration//Cam130_3//CalibrateStereo//";
     std::string StereoMatchingImgPathCam3     = "..//Calibration//Cam130_3//StereoMatching//";
 
+    /// Cam Group Test ///
+    char *CamNameL = "Cam3";
+    char *CamNameR = "Cam14";
+    std::string CalibrateImgPathCamL         = "..//Calibration//CalibrateA//";
+    std::string CalibrateImgPathCamR         = "..//Calibration//CalibrateB//";
+    std::string StereoCalibrateImgPath       = "..//Calibration//CalibrateStereo//";
+    std::string StereoMatchingImgPath        = "..//Calibration//StereoMatching//";
+
     /// Calib Cam1 to Cam2 ///
     std::string CalibrateImgPathCalib1Cam2    = "..//Calibration//CamCalib1to2//CalibrateA//";
     std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateB//";
@@ -86,12 +99,12 @@ int main()
 //// chessboard parameter ////
     int   PointsCols        = 7;
     int   PointsRows        = 7;
-    float CircleDistWidth   = 2.5;      /// mm
-    float CircleDistHeight  = 2.5;      /// mm
+    float CircleDistWidth   = 4;      /// mm
+    float CircleDistHeight  = 4;      /// mm
 
-    float CircleDiameter    = 1;        /// mm
-    float BoardWidth        = 20;       /// mm
-    float BoardHeight       = 20;       /// mm
+    float CircleDiameter    = 2;        /// mm
+    float BoardWidth        = 63;       /// mm
+    float BoardHeight       = 63;       /// mm
 
 ///////////////////////////////
     bool LeftRight          = false;
@@ -100,7 +113,7 @@ int main()
 
     bool OpenCamera         = true;
     bool DebugMode          = false;
-    bool DoCamerCalibration = true;
+    bool DoCamerCalibration = false;
     bool CaputureImgs       = false;
 
     CalibrationBoard CircleBoard(PointsCols,PointsRows,CircleDistWidth,CircleDistHeight,BoardWidth,BoardHeight,CircleDiameter);
@@ -127,7 +140,7 @@ int main()
             Cam1R.Initialize();
 
             StereoSystem StereoCam1LR(&Cam1L, &Cam1R, StereoCalibrateImgPathCam1, StereoMatchingImgPathCam1, ImgFormat,
-                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -163,7 +176,7 @@ int main()
             Cam2L.Initialize();
             Cam2R.Initialize();
             StereoSystem StereoCam2LR(&Cam2L, &Cam2R, StereoCalibrateImgPathCam2, StereoMatchingImgPathCam2, ImgFormat,
-                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -200,7 +213,7 @@ int main()
             Cam3R.Initialize();
 
             StereoSystem StereoCam3LR(&Cam3L, &Cam3R, StereoCalibrateImgPathCam3, StereoMatchingImgPathCam3, ImgFormat,
-                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -240,7 +253,7 @@ int main()
 
             StereoSystem StereoCam1Cam2(&Calib1Cam1R, &Calib1Cam2R, StereoCalibrateImgPathCam1to2,
                                         StereoMatchingImgPathCam1to2, ImgFormat,
-                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -278,7 +291,7 @@ int main()
 
             StereoSystem StereoCam3Cam2(&Calib2Cam3R, &Calib2Cam2R, StereoCalibrateImgPathCam3to2,
                                         StereoMatchingImgPathCam3to2, ImgFormat,
-                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -317,7 +330,7 @@ int main()
 
             StereoSystem StereoCam1Cam3(&Calib3Cam1R, &Calib3Cam3R, StereoCalibrateImgPathCam1to3,
                                         StereoMatchingImgPathCam1to3, ImgFormat,
-                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
+                                        MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
 
             if (DoCamerCalibration)
             {
@@ -341,6 +354,43 @@ int main()
             StereoCam1Cam3.LoadStereoCamInfo(LeftRight);
             int WorkingDistCam1Cam3[2] = {MinDist, MinDist + WorkingRange};
             StereoCam1Cam3.Compute3DMap(WorkingDistCam1Cam3, LeftRight, DebugMode, SADWindowSize, TextureThreshold);
+        }
+            break;
+
+        case 7:
+        {
+            /// Cam Group Test ///
+            CamSys CamL(cam, CamNameL, ImageWidth, ImageHeight, ExposureTimeLeftCam,  MaxExposureTime, CalibrateImgPathCamL, ImgFormat);    ///initialize left camera
+            CamSys CamR(cam, CamNameR, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime, CalibrateImgPathCamR, ImgFormat);    ///initialize right camera
+            CamL.Initialize();
+            CamR.Initialize();
+
+            StereoSystem StereoCamLR(&CamL, &CamR, StereoCalibrateImgPath, StereoMatchingImgPath, ImgFormat,
+                                      MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold, MaxUniquenessRatio);
+
+            if (DoCamerCalibration)
+            {
+                if  (CaputureImgs)
+                {
+                    bool ChangeDirection = StereoCamLR.SelectCamDirection();
+                    if (ChangeDirection)
+                    {
+                        std::cout<<"Need To Change Camera Position!!!"<<std::endl;
+                        exit(0);
+                    }
+                    //////////// adjust focus ////////////
+                    StereoCamLR.AdjustCameraFocus();
+                }
+                ////  Single Camera Calibration  /////
+                StereoCamLR.CamLeft->CalibrateCamera(CircleBoard,15,CaputureImgs);
+                StereoCamLR.CamRight->CalibrateCamera(CircleBoard,15,CaputureImgs);
+                ////  Stereo Camera Calibration  /////
+                StereoCamLR.StereoCalibration(CircleBoard,15,CaputureImgs);
+            }
+
+            StereoCamLR.LoadStereoCamInfo(LeftRight);
+            int WorkingDist[2] = {MinDist,MinDist+WorkingRange};
+            StereoCamLR.Compute3DMap(WorkingDist,LeftRight,DebugMode, SADWindowSize, TextureThreshold);
         }
             break;
 
