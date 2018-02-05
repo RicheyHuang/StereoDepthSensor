@@ -3,6 +3,11 @@
 //
 #include "CalibrationBoard.h"
 
+namespace cv
+{
+    using std::vector;
+}
+
 CalibrationBoard::CalibrationBoard(int PointsCols,int PointsRows,float CircleDistWidth,float CircleDistHeight,float BoardWidth,float BoardHeight,float CircleDiameter):
         PointsCols(PointsCols), PointsRows(PointsRows),PointsNum(PointsCols*PointsRows),CircleDistWidth(CircleDistWidth),CircleDistHeight(CircleDistHeight), BoardWidth(BoardWidth), BoardHeight(BoardHeight),BoardSize(cv::Size(PointsCols,PointsRows)),CircleDiameter(CircleDiameter)
 {

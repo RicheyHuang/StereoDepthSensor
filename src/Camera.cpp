@@ -43,7 +43,7 @@ bool Camera::EnumerateDevice() //枚举设备，并建立设备列表
 
 std::string Camera::Getname()   //得到相机昵称
 {
-    string name;
+    std::string name;
     char * cam_name;
     for (int i=0; i<this->iCameraCounts; i++){
         cam_name = this->tCameraEnumList[i].acFriendlyName;
@@ -166,7 +166,9 @@ Mat Camera::getImage(int hCam, UINT wTimes_ms)
         iplImage[hCam] = cvCreateImageHeader(cvSize(sFrameInfo[hCam].iWidth,sFrameInfo[hCam].iHeight),IPL_DEPTH_8U,channel[hCam]);
         cvSetData(iplImage[hCam],g_pRgbBuffer[hCam],sFrameInfo[hCam].iWidth*channel[hCam]);//此处只是设置指针，无图像块数据拷贝，不需担心转换效率
         //以下两种方式都可以显示图像或者处理图像
-        Mat Iimag(iplImage[hCam]);//这里只是进行指针转换，将IplImage转换成Mat类型
+
+        Mat Iimag = cvarrToMat(iplImage[hCam]);//这里只是进行指针转换，将IplImage转换成Mat类型
+//        Mat Iimag(iplImage[hCam]);//这里只是进行指针转换，将IplImage转换成Mat类型
         CameraReleaseImageBuffer(hCam,pbyBuffer[hCam]);
         return Iimag;
     }
@@ -1074,7 +1076,7 @@ std::string Camera::GetFriendlyName(int hCam)	//得到相机昵称
     char pName[32];
     if (CameraGetFriendlyName(hCam,pName) == 0){
         // return -1;
-        string Name = std::string(pName);
+        std::string Name = std::string(pName);
         return Name;
     }
 }

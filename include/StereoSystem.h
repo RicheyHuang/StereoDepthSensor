@@ -22,7 +22,9 @@ public:
     cv::Mat RL, RR, PL, PR, Q;
     cv::Size ImgSize;
 
-    cv::StereoBM bm;
+    /// cv::StereoBM is a pure abstract class, so it cannot be used as a class member. The solution is to use pointer
+    cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create();
+
     int CamWorkingRange;
     int WorkingDistance[2];
     int MaxSADWindowSize;
@@ -30,6 +32,10 @@ public:
     int MaxWorkingRange;
     int MaxTextureThreshold;
     int MaxUniquenessRatio;
+
+    int blockSize;
+    int textureThreshold;
+    int uniquenessRatio;
 
     cv::Mat ReMapLeftX;
     cv::Mat ReMapLeftY;

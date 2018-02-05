@@ -5,7 +5,6 @@
 #include "StereoSystem.h"
 
 
-
 StereoSystem::StereoSystem(CamSys* CamLeft,
                            CamSys* CamRight,
                            std::string ImgPath,
@@ -90,17 +89,17 @@ void StereoSystem::UpdateSADWindowSize(int SADWindowSize, void*)
     /// The SADWindowSize should be odd number ///
     if (SADWindowSize % 2 == 0)
         SADWindowSize += 1;
-    bm.state->SADWindowSize = SADWindowSize;
+    bm->setBlockSize(SADWindowSize);
 }
 
 void StereoSystem::UpdateTextureThresh(int TextureThresh, void *)
 {
-    bm.state->textureThreshold =TextureThresh;
+    bm->setTextureThreshold(TextureThresh);
 }
 
 void StereoSystem::UpdateUniquenessRatio(int UniquenessRatio, void *)
 {
-    bm.state->uniquenessRatio =UniquenessRatio;
+    bm->setUniquenessRatio(UniquenessRatio);
 }
 
 void StereoSystem::UpdateMinDist(int MinDist, void*)
@@ -111,10 +110,10 @@ void StereoSystem::UpdateMinDist(int MinDist, void*)
     int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
     int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
     int mindisp = disp1;
-    bm.state->minDisparity = mindisp-xd;
-    bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
+    bm->setMinDisparity(mindisp-xd);
+    bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
 
-    DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
+    DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
     cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
     dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
     dispsbm8.convertTo(dispsbm8, CV_8UC1);
@@ -131,10 +130,10 @@ void StereoSystem::UpdateWorkingRange(int WorkingRange, void*)
     int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
     int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
     int mindisp = disp1;
-    bm.state->minDisparity = mindisp-xd;
-    bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
+    bm->setMinDisparity(mindisp-xd);
+    bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
 
-    DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
+    DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
     cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
     dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
     dispsbm8.convertTo(dispsbm8, CV_8UC1);
@@ -422,7 +421,7 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
    /////////////////////////////////   Left Right Stereo ////////////////////////////////////
     std::cout << "...Using Image Points To Compute Stereo Camera Calibration..." << std::endl;
     double CaliError = cv::stereoCalibrate(ObjVectorAll, CamLeftCornersAll, CamRightCornersAll, CamLeft->intrinsicMatrix, CamLeft->distortionMatrix, CamRight->intrinsicMatrix, CamRight->distortionMatrix,
-                                           ImgSize, R, T, E, F, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 100, 1e-6), CV_CALIB_USE_INTRINSIC_GUESS);
+                                           ImgSize, R, T, E, F, CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 100, 1e-6));
     std::cout << "done with RMS error=" << CaliError << std::endl;
 
     ////////////////   ComputeStereoRectifyMatrix
@@ -455,7 +454,7 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
     /////////////////////////////////   Right Left Stereo ////////////////////////////////////
     std::cout<<"...Using Image Points To Compute Stereo Camera Calibration..."<<std::endl;
     CaliError = cv::stereoCalibrate(ObjVectorAll,CamRightCornersAll,CamLeftCornersAll,CamRight->intrinsicMatrix,CamRight->distortionMatrix,CamLeft->intrinsicMatrix,CamLeft->distortionMatrix,
-                                           ImgSize,R,T,E,F,cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-6),CV_CALIB_USE_INTRINSIC_GUESS);
+                                           ImgSize,R,T,E,F,CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-6));
     std::cout << "done with RMS error=" <<CaliError<< std::endl;
 
     ////////////////   ComputeStereoRectifyMatrix
@@ -561,18 +560,14 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
     /////////// block matching parameters ///////
 
-    bm.state->SADWindowSize=SADWindowSize; //39 17
-    bm.state->textureThreshold =TextureThreshold;   //5000; threshold for denoise filter
+    blockSize = SADWindowSize;
+    textureThreshold = TextureThreshold;
+    bm->setBlockSize(blockSize);
+    bm->setTextureThreshold(textureThreshold);
 
-    bm.state->uniquenessRatio = 5;
-    bm.state->disp12MaxDiff = -1;
-    // bm.state->speckleWindowSize = 9;
-    // bm.state->speckleRange = 3;
-
-    ////  for testing ///
-    // bm.state->speckleWindowSize = 0;
-    // bm.state->speckleRange = 0;
-    // bm.state->uniquenessRatio = 1;
+    uniquenessRatio = 5;
+    bm->setUniquenessRatio(uniquenessRatio);
+    bm->setDisp12MaxDiff(-1);
 
     if (LeftRight)
     {
@@ -580,8 +575,8 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
         int disp2 = -PR.at<double>(0,3)/WorkingDistance[1];
         int xd = PR.at<double>(0,2)-PL.at<double>(0,2);
         int mindisp = disp1;
-        bm.state->minDisparity = mindisp+xd;
-        bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
+        bm->setMinDisparity(mindisp+xd);
+        bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
     }
     else
     {
@@ -589,11 +584,12 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
         int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
         int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
         int mindisp = disp1;
-        bm.state->minDisparity = mindisp-xd;
-        bm.state->numberOfDisparities = (int((abs(disp1-disp2)+15)/16))*16;
+        bm->setMinDisparity(mindisp-xd);
+        bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
     }
 
-    DepthMapSize = cv::Size(ImgSize.width+bm.state->minDisparity,ImgSize.height);
+
+    DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
 //    cv::Size DepthMapSizeResize = DepthMapSize;
     HandleLeft = std::string(CamLeft->CamName);
     HandleRight = std::string(CamRight->CamName);
@@ -604,11 +600,11 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
     CreateImgWindow(HandleLeft,ImgSize,HandleRight,ImgSize,HandleDepthMap,DepthMapSize,0.95);
     cv::createTrackbar("ExposureTime：",     HandleLeft,     &CamLeft->ExposureTime,      CamLeft->MaxExposureTime,  onChangeLeftCam,         this);
     cv::createTrackbar("ExposureTime：",     HandleRight,    &CamRight->ExposureTime,     CamRight->MaxExposureTime, onChangeRightCam,        this);
-    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &bm.state->SADWindowSize,    MaxSADWindowSize,          onChangeSADWinSize,      this);
+    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &blockSize,                  MaxSADWindowSize,          onChangeSADWinSize,      this);
     cv::createTrackbar("MinDistance：",      HandleDepthMap, &WorkingDistance[0],         MaxValForMinDist,          onChangeMinDist,         this);
     cv::createTrackbar("WorkingRange：",     HandleDepthMap, &CamWorkingRange,            MaxWorkingRange,           onChangeWorkRange,       this);
-    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &bm.state->textureThreshold, MaxTextureThreshold,       onChangeTextureThresh,   this);
-    cv::createTrackbar("UniquenessRatio：",  HandleDepthMap, &bm.state->uniquenessRatio,  MaxUniquenessRatio,        onChangeUniquenessRatio, this);
+    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &textureThreshold,           MaxTextureThreshold,       onChangeTextureThresh,   this);
+    cv::createTrackbar("UniquenessRatio：",  HandleDepthMap, &uniquenessRatio,            MaxUniquenessRatio,        onChangeUniquenessRatio, this);
 
     while(true)
     {
@@ -645,10 +641,10 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
             if (LeftRight)
             {
-                bm.operator()(RectifyLeft, RectifyRight, dispsbm, CV_32F);
+                bm->compute(RectifyLeft, RectifyRight, dispsbm);
             } else
             {
-                bm.operator()(RectifyRight, RectifyLeft, dispsbm, CV_32F);
+                bm->compute(RectifyRight, RectifyLeft, dispsbm);
             }
 
             dispsbm = dispsbm(cv::Rect(0, 0, DepthMapSize.width, DepthMapSize.height));
@@ -677,13 +673,13 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
     }
 
-    AdjustLeftCamExposure (CamLeft->ExposureTime,   0);
-    AdjustRightCamExposure(CamRight->ExposureTime,  0);
-    UpdateSADWindowSize   (bm.state->SADWindowSize,    0);
-    UpdateMinDist         (WorkingDistance[0],         0);
-    UpdateWorkingRange    (CamWorkingRange,            0);
-    UpdateTextureThresh   (bm.state->textureThreshold, 0);
-    UpdateUniquenessRatio (bm.state->uniquenessRatio, 0);
+    AdjustLeftCamExposure (CamLeft->ExposureTime,     0);
+    AdjustRightCamExposure(CamRight->ExposureTime,    0);
+    UpdateSADWindowSize   (bm->getBlockSize(),        0);
+    UpdateMinDist         (WorkingDistance[0],        0);
+    UpdateWorkingRange    (CamWorkingRange,           0);
+    UpdateTextureThresh   (bm->getTextureThreshold(), 0);
+    UpdateUniquenessRatio (bm->getUniquenessRatio(),  0);
 
 
 }

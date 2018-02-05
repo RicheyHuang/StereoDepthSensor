@@ -8,6 +8,10 @@
 #include <linux/fb.h>
 #include<sys/ioctl.h>
 
+namespace cv
+{
+    using std::vector;
+}
 
 void DrawPoints(cv::Mat Img,cv::vector<cv::Point> Points);
 void DrawPoints(cv::Mat Img,cv::vector<cv::Point2f> Points);
