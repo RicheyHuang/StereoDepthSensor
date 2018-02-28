@@ -19,7 +19,7 @@
 
 int main()
 {
-    int UsingCamGroup = CAMERA_GROUP_TEST;
+    int UsingCamGroup = CAMERA_CALIB_CAM1_TO_CAM2;
 
     /// Parameters adjusted by trackbar ///
     int ImageWidth  = 1280;
@@ -70,26 +70,26 @@ int main()
     /// Cam Group Test ///
     char *CamNameL = "Cam3";
     char *CamNameR = "Cam14";
-    std::string CalibrateImgPathCamL         = "..//Calibration//CalibrateA//";
-    std::string CalibrateImgPathCamR         = "..//Calibration//CalibrateB//";
-    std::string StereoCalibrateImgPath       = "..//Calibration//CalibrateStereo//";
-    std::string StereoMatchingImgPath        = "..//Calibration//StereoMatching//";
+    std::string CalibrateImgPathCamL         = "..//Calibration//Test//CalibrateA//";
+    std::string CalibrateImgPathCamR         = "..//Calibration//Test//CalibrateB//";
+    std::string StereoCalibrateImgPath       = "..//Calibration//Test//CalibrateStereo//";
+    std::string StereoMatchingImgPath        = "..//Calibration//Test//StereoMatching//";
 
     /// Calib Cam1 to Cam2 ///
-    std::string CalibrateImgPathCalib1Cam2    = "..//Calibration//CamCalib1to2//CalibrateA//";
-    std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateB//";
+    std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateA//";
+    std::string CalibrateImgPathCalib1Cam2   = "..//Calibration//CamCalib1to2//CalibrateB//";
     std::string StereoCalibrateImgPathCam1to2 = "..//Calibration//CamCalib1to2//CalibrateStereo//";
     std::string StereoMatchingImgPathCam1to2  = "..//Calibration//CamCalib1to2//StereoMatching//";
 
     /// Calib Cam3 to Cam2 ///
-    std::string CalibrateImgPathCalib2Cam2    = "..//Calibration//CamCalib3to2//CalibrateA//";
-    std::string CalibrateImgPathCalib2Cam3    = "..//Calibration//CamCalib3to2//CalibrateB//";
+    std::string CalibrateImgPathCalib2Cam3    = "..//Calibration//CamCalib3to2//CalibrateA//";
+    std::string CalibrateImgPathCalib2Cam2    = "..//Calibration//CamCalib3to2//CalibrateB//";
     std::string StereoCalibrateImgPathCam3to2 = "..//Calibration//CamCalib3to2//CalibrateStereo//";
     std::string StereoMatchingImgPathCam3to2  = "..//Calibration//CamCalib3to2//StereoMatching//";
 
     /// Calib Cam1 to Cam3 ///
-    std::string CalibrateImgPathCalib3Cam3    = "..//Calibration//CamCalib1to3//CalibrateA//";
-    std::string CalibrateImgPathCalib3Cam1    = "..//Calibration//CamCalib1to3//CalibrateB//";
+    std::string CalibrateImgPathCalib3Cam1    = "..//Calibration//CamCalib1to3//CalibrateA//";
+    std::string CalibrateImgPathCalib3Cam3    = "..//Calibration//CamCalib1to3//CalibrateB//";
     std::string StereoCalibrateImgPathCam1to3 = "..//Calibration//CamCalib1to3//CalibrateStereo//";
     std::string StereoMatchingImgPathCam1to3  = "..//Calibration//CamCalib1to3//StereoMatching//";
 
@@ -99,21 +99,21 @@ int main()
 //// chessboard parameter ////
     int   PointsCols        = 7;
     int   PointsRows        = 7;
-    float CircleDistWidth   = 4;      /// mm
-    float CircleDistHeight  = 4;      /// mm
+    float CircleDistWidth   = 2.5;      /// mm
+    float CircleDistHeight  = 2.5;      /// mm
 
-    float CircleDiameter    = 2;        /// mm
-    float BoardWidth        = 63;       /// mm
-    float BoardHeight       = 63;       /// mm
+    float CircleDiameter    = 1;        /// mm
+    float BoardWidth        = 20;       /// mm
+    float BoardHeight       = 20;       /// mm
 
 ///////////////////////////////
     bool LeftRight          = false;
     /// true:  map coordinate sys of right cam to left cam (left cam as reference)
     /// false: map coordinate sys of left cam to right cam (right cam as reference)
 
-    bool OpenCamera         = true;
+    bool OpenCamera         = false;
     bool DebugMode          = false;
-    bool DoCamerCalibration = false;
+    bool DoCamerCalibration = true;
     bool CaputureImgs       = false;
 
     CalibrationBoard CircleBoard(PointsCols,PointsRows,CircleDistWidth,CircleDistHeight,BoardWidth,BoardHeight,CircleDiameter);

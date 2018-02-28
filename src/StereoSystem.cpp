@@ -114,10 +114,6 @@ void StereoSystem::UpdateMinDist(int MinDist, void*)
     bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
 
     DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
-    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
-    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
-    dispsbm8.convertTo(dispsbm8, CV_8UC1);
-    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
 
 }
 
@@ -134,10 +130,7 @@ void StereoSystem::UpdateWorkingRange(int WorkingRange, void*)
     bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
 
     DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
-    cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
-    dispsbm8 = (dispsbm - minVal) * (255 / (maxVal - minVal));
-    dispsbm8.convertTo(dispsbm8, CV_8UC1);
-    cv::reprojectImageTo3D(dispsbm, Pts3D, Q, true);
+
 }
 
 
@@ -162,7 +155,7 @@ bool StereoSystem::SelectCamDirection()
 
         CamLeft->CapImage();
         CamRight->CapImage();
-        //std::cout<<(key & 255)<<std::endl;
+
         cv::imshow(HandleLeft, CamLeft->frame);
         cv::imshow(HandleRight,CamRight->frame);
         key = cv::waitKey(1);
@@ -357,9 +350,8 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
     {
         for (success=0;success<CaliImgNum;success++)
         {
-            loadMat(CamLeft->frame, ImgPath+CamLeft->CamName+"_Stereo_",success, ImgFormat);    //+"_Stereo_"
-            //CamLeft->frame = cv::imread(ImgPath+"CanNotDetectImg"+ImgFromat,-1);
-            loadMat(CamRight->frame, ImgPath+CamRight->CamName+"_Stereo_",success, ImgFormat);    //+"_Stereo_"
+            loadMat(CamLeft->frame, ImgPath+CamLeft->CamName+"_Stereo_",success, ImgFormat);
+            loadMat(CamRight->frame, ImgPath+CamRight->CamName+"_Stereo_",success, ImgFormat);
             cv::imshow(HandleLeft, CamLeft->frame);
             cv::imshow(HandleRight, CamRight->frame);
             cv::waitKey(500);
@@ -571,6 +563,7 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
     if (LeftRight)
     {
+        /// convert the abstract variable to have a realistic meaning ///
         int disp1 = -PR.at<double>(0,3)/WorkingDistance[0];
         int disp2 = -PR.at<double>(0,3)/WorkingDistance[1];
         int xd = PR.at<double>(0,2)-PL.at<double>(0,2);
@@ -598,13 +591,13 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
     bool GetImgError = false;
     int key;
     CreateImgWindow(HandleLeft,ImgSize,HandleRight,ImgSize,HandleDepthMap,DepthMapSize,0.95);
-    cv::createTrackbar("ExposureTime：",     HandleLeft,     &CamLeft->ExposureTime,      CamLeft->MaxExposureTime,  onChangeLeftCam,         this);
-    cv::createTrackbar("ExposureTime：",     HandleRight,    &CamRight->ExposureTime,     CamRight->MaxExposureTime, onChangeRightCam,        this);
-    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &blockSize,                  MaxSADWindowSize,          onChangeSADWinSize,      this);
-    cv::createTrackbar("MinDistance：",      HandleDepthMap, &WorkingDistance[0],         MaxValForMinDist,          onChangeMinDist,         this);
-    cv::createTrackbar("WorkingRange：",     HandleDepthMap, &CamWorkingRange,            MaxWorkingRange,           onChangeWorkRange,       this);
-    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &textureThreshold,           MaxTextureThreshold,       onChangeTextureThresh,   this);
-    cv::createTrackbar("UniquenessRatio：",  HandleDepthMap, &uniquenessRatio,            MaxUniquenessRatio,        onChangeUniquenessRatio, this);
+    cv::createTrackbar("ExposureTime：",     HandleLeft,     &CamLeft->ExposureTime,  CamLeft->MaxExposureTime,  onChangeLeftCam,         this);
+    cv::createTrackbar("ExposureTime：",     HandleRight,    &CamRight->ExposureTime, CamRight->MaxExposureTime, onChangeRightCam,        this);
+    cv::createTrackbar("SADWindowSize：",    HandleDepthMap, &blockSize,              MaxSADWindowSize,          onChangeSADWinSize,      this);
+    cv::createTrackbar("MinDistance：",      HandleDepthMap, &WorkingDistance[0],     MaxValForMinDist,          onChangeMinDist,         this);
+    cv::createTrackbar("WorkingRange：",     HandleDepthMap, &CamWorkingRange,        MaxWorkingRange,           onChangeWorkRange,       this);
+    cv::createTrackbar("TextureThreshold：", HandleDepthMap, &textureThreshold,       MaxTextureThreshold,       onChangeTextureThresh,   this);
+    cv::createTrackbar("UniquenessRatio：",  HandleDepthMap, &uniquenessRatio,        MaxUniquenessRatio,        onChangeUniquenessRatio, this);
 
     while(true)
     {
