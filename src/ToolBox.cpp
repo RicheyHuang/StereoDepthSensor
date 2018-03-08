@@ -366,3 +366,47 @@ void saveXYZ(std::string filenameString,const cv::Mat& mat)
             "}");
     fclose(fp);
 }
+
+void savePCD(std::string filename, const cv::Mat& mat)
+{
+    const double max_z = 1.0e4;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    for(int y = 0; y < mat.rows; y++)
+    {
+        for(int x = 0; x < mat.cols; x++)
+        {
+            cv::Vec3f point = mat.at<cv::Vec3f>(y, x);
+            if(fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z) continue;
+            pcl::PointXYZ Point;
+            Point.x = point[0];
+            Point.y = point[1];
+            Point.z = point[2];
+            pointCloud->points.push_back(Point);
+        }
+    }
+    pointCloud->width = (int)pointCloud->points.size();
+    pointCloud->height = 1;
+    pcl::io::savePCDFile(filename, *pointCloud);
+}
+
+void savePLY(std::string filename, const cv::Mat& mat)
+{
+    const double max_z = 1.0e4;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    for(int y = 0; y < mat.rows; y++)
+    {
+        for(int x = 0; x < mat.cols; x++)
+        {
+            cv::Vec3f point = mat.at<cv::Vec3f>(y, x);
+            if(fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z) continue;
+            pcl::PointXYZ Point;
+            Point.x = point[0];
+            Point.y = point[1];
+            Point.z = point[2];
+            pointCloud->points.push_back(Point);
+        }
+    }
+    pointCloud->width = (int)pointCloud->points.size();
+    pointCloud->height = 1;
+    pcl::io::savePLYFile(filename, *pointCloud);
+}

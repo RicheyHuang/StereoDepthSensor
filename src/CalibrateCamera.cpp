@@ -10,15 +10,16 @@
 #define CAMERA_GROUP_1  1;
 #define CAMERA_GROUP_2  2;
 #define CAMERA_GROUP_3  3;
-#define CAMERA_CALIB_CAM1_TO_CAM2 4;
-#define CAMERA_CALIB_CAM3_TO_CAM2 5;
-#define CAMERA_CALIB_CAM1_TO_CAM3 6;
+#define CAMERA_CAM1_TO_CAM2 4;
+#define CAMERA_CAM3_TO_CAM2 5;
+#define CAMERA_CAM1_TO_CAM3 6;
 
-/// The code below uses left cam as the reference ///
+
+/// The code below uses right cam as the reference ///
 
 int main()
 {
-    int UsingCamGroup = CAMERA_CALIB_CAM1_TO_CAM3;
+    int UsingCamGroup = CAMERA_GROUP_1;
 
     /// Parameters adjusted by trackbar ///
     int ImageWidth  = 1280;
@@ -28,7 +29,7 @@ int main()
     int ExposureTimeRightCam = 18000;
     int SADWindowSize        = 17;
     int MinDist              = 330;
-    int WorkingRange         = 50;
+    int WorkingRange         = 200;
 
     int MaxExposureTime      = 500000;
     int MaxSADWindowSize     = 99;
@@ -63,32 +64,22 @@ int main()
     std::string StereoMatchingImgPathCam3     = "..//Calibration//Cam130_3//StereoMatching//";
 
     /// Calib Cam1 to Cam2 ///
-    std::string CalibrateImgPathCalib1Cam1    = "..//Calibration//CamCalib1to2//CalibrateA//";
-    std::string CalibrateImgPathCalib1Cam2    = "..//Calibration//CamCalib1to2//CalibrateB//";
-    std::string StereoCalibrateImgPathCam1to2 = "..//Calibration//CamCalib1to2//CalibrateStereo//";
-    std::string StereoMatchingImgPathCam1to2  = "..//Calibration//CamCalib1to2//StereoMatching//";
-
-    std::string RectifyCalib1LeftCamPath      = "..//Calibration//Cam130_1//CalibrateStereo//";
-    std::string RectifyCalib1RightCamPath     = "..//Calibration//Cam130_2//CalibrateStereo//";
+    std::string CalibrateImgPathCam1to2_1     = "..//Calibration//Cam1to2//CalibrateA//";
+    std::string CalibrateImgPathCam1to2_2     = "..//Calibration//Cam1to2//CalibrateB//";
+    std::string StereoCalibrateImgPathCam1to2 = "..//Calibration//Cam1to2//CalibrateStereo//";
+    std::string StereoMatchingImgPathCam1to2  = "..//Calibration//Cam1to2//StereoMatching//";
 
     /// Calib Cam3 to Cam2 ///
-    std::string CalibrateImgPathCalib2Cam3    = "..//Calibration//CamCalib3to2//CalibrateA//";
-    std::string CalibrateImgPathCalib2Cam2    = "..//Calibration//CamCalib3to2//CalibrateB//";
-    std::string StereoCalibrateImgPathCam3to2 = "..//Calibration//CamCalib3to2//CalibrateStereo//";
-    std::string StereoMatchingImgPathCam3to2  = "..//Calibration//CamCalib3to2//StereoMatching//";
-
-    std::string RectifyCalib2LeftCamPath      = "..//Calibration//Cam130_3//CalibrateStereo//";
-    std::string RectifyCalib2RightCamPath     = "..//Calibration//Cam130_2//CalibrateStereo//";
+    std::string CalibrateImgPathCam3to2_3     = "..//Calibration//Cam3to2//CalibrateA//";
+    std::string CalibrateImgPathCam3to2_2     = "..//Calibration//Cam3to2//CalibrateB//";
+    std::string StereoCalibrateImgPathCam3to2 = "..//Calibration//Cam3to2//CalibrateStereo//";
+    std::string StereoMatchingImgPathCam3to2  = "..//Calibration//Cam3to2//StereoMatching//";
 
     /// Calib Cam1 to Cam3 ///
-    std::string CalibrateImgPathCalib3Cam1    = "..//Calibration//CamCalib1to3//CalibrateA//";
-    std::string CalibrateImgPathCalib3Cam3    = "..//Calibration//CamCalib1to3//CalibrateB//";
-    std::string StereoCalibrateImgPathCam1to3 = "..//Calibration//CamCalib1to3//CalibrateStereo//";
-    std::string StereoMatchingImgPathCam1to3  = "..//Calibration//CamCalib1to3//StereoMatching//";
-
-    std::string RectifyCalib3LeftCamPath      = "..//Calibration//Cam130_1//CalibrateStereo//";
-    std::string RectifyCalib3RightCamPath     = "..//Calibration//Cam130_3//CalibrateStereo//";
-
+    std::string CalibrateImgPathCam1to3_1     = "..//Calibration//Cam1to3//CalibrateA//";
+    std::string CalibrateImgPathCam1to3_3     = "..//Calibration//Cam1to3//CalibrateB//";
+    std::string StereoCalibrateImgPathCam1to3 = "..//Calibration//Cam1to3//CalibrateStereo//";
+    std::string StereoMatchingImgPathCam1to3  = "..//Calibration//Cam1to3//StereoMatching//";
 
     std::string ImgFormat = ".png";
 
@@ -104,13 +95,13 @@ int main()
 
 ///////////////////////////////
     bool LeftRight          = false;
-    /// true:  map coordinate sys of right cam to left cam (left cam as reference)
-    /// false: map coordinate sys of left cam to right cam (right cam as reference)
+    /// true:  map the coordinates of right cam to left cam (left cam as reference)
+    /// false: map the coordinates of left cam to right cam (right cam as reference)
 
     bool OpenCamera         = true;
     bool DebugMode          = false;
-    bool DoCamerCalibration = true;
-    bool CaputureImgs       = true;
+    bool DoCamerCalibration = false;
+    bool CaputureImgs       = false;
 
     CalibrationBoard CircleBoard(PointsCols,PointsRows,CircleDistWidth,CircleDistHeight,BoardWidth,BoardHeight,CircleDiameter);
 
@@ -240,36 +231,35 @@ int main()
         case 4:
         {
             /// Calib Cam1 to Cam2 ///
-            CamSys Calib1Cam1R(cam, CamName1R, ImageWidth, ImageHeight, ExposureTimeLeftCam,  MaxExposureTime,
-                               CalibrateImgPathCalib1Cam1, ImgFormat);    ///initialize camera1
-            CamSys Calib1Cam2R(cam, CamName2R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
-                               CalibrateImgPathCalib1Cam2, ImgFormat);    ///initialize camera2
-            Calib1Cam1R.Initialize();
-            Calib1Cam2R.Initialize();
+            CamSys Cam12R_1R(cam, CamName1R, ImageWidth, ImageHeight, ExposureTimeLeftCam,  MaxExposureTime,
+                               CalibrateImgPathCam1to2_1, ImgFormat);    ///initialize camera1
+            CamSys Cam12R_2R(cam, CamName2R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
+                               CalibrateImgPathCam1to2_2, ImgFormat);    ///initialize camera2
+            Cam12R_1R.Initialize();
+            Cam12R_2R.Initialize();
 
-            StereoSystem StereoCam1Cam2(&Calib1Cam1R, &Calib1Cam2R, StereoCalibrateImgPathCam1to2,
+            /// LeftRight: 2->1   RightLeft: 1->2 ///
+            StereoSystem StereoCam12R(&Cam12R_1R, &Cam12R_2R, StereoCalibrateImgPathCam1to2,
                                         StereoMatchingImgPathCam1to2, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
             if (DoCamerCalibration)
             {
                 if (CaputureImgs) {
-                    bool ChangeDirection = StereoCam1Cam2.SelectCamDirection();
+                    bool ChangeDirection = StereoCam12R.SelectCamDirection();
                     if (ChangeDirection) {
                         std::cout << "Need To Change Camera Position!!!" << std::endl;
                         exit(0);
                     }
                     //////////// adjust focus ////////////
-                    StereoCam1Cam2.AdjustCameraFocus();
+                    StereoCam12R.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-//                StereoCam1Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
-//                StereoCam1Cam2.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
 
-                StereoCam1Cam2.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib1LeftCamPath);
-                StereoCam1Cam2.LoadRectifyRightCamInfo(LeftRight, RectifyCalib1RightCamPath);
-
+                /// The intrinsic and distortion matrix of camera should use the one calculated by stereo calibration ///
+//              StereoCam12R.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+//              StereoCam12R.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
                 ////  Stereo Camera Calibration  /////
-                StereoCam1Cam2.StereoCalibration(CircleBoard, 15, CaputureImgs);
+                StereoCam12R.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
         }
             break;
@@ -277,36 +267,34 @@ int main()
         case 5:
         {
             /// Calib Cam3 to Cam2 ///
-            CamSys Calib2Cam3R(cam, CamName3R, ImageWidth, ImageHeight, ExposureTimeLeftCam, MaxExposureTime,
-                               CalibrateImgPathCalib2Cam3, ImgFormat);    ///initialize camera3
-            CamSys Calib2Cam2R(cam, CamName2R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
-                               CalibrateImgPathCalib2Cam2, ImgFormat);    ///initialize camera2
-            Calib2Cam3R.Initialize();
-            Calib2Cam2R.Initialize();
-            StereoSystem StereoCam3Cam2(&Calib2Cam3R, &Calib2Cam2R, StereoCalibrateImgPathCam3to2,
+            CamSys Cam32R_3R(cam, CamName3R, ImageWidth, ImageHeight, ExposureTimeLeftCam, MaxExposureTime,
+                               CalibrateImgPathCam3to2_3, ImgFormat);    ///initialize camera3
+            CamSys Cam32R_2R(cam, CamName2R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
+                               CalibrateImgPathCam3to2_2, ImgFormat);    ///initialize camera2
+            Cam32R_3R.Initialize();
+            Cam32R_2R.Initialize();
+            /// LeftRight: 2->3   RightLeft: 3->2 ///
+            StereoSystem StereoCam32R(&Cam32R_3R, &Cam32R_2R, StereoCalibrateImgPathCam3to2,
                                         StereoMatchingImgPathCam3to2, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
             if (DoCamerCalibration)
             {
                 if (CaputureImgs)
                 {
-                    bool ChangeDirection = StereoCam3Cam2.SelectCamDirection();
+                    bool ChangeDirection = StereoCam32R.SelectCamDirection();
                     if (ChangeDirection) {
                         std::cout << "Need To Change Camera Position!!!" << std::endl;
                         exit(0);
                     }
                     //////////// adjust focus ////////////
-                    StereoCam3Cam2.AdjustCameraFocus();
+                    StereoCam32R.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-                StereoCam3Cam2.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
-                StereoCam3Cam2.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
-
-                StereoCam3Cam2.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib2LeftCamPath);
-                StereoCam3Cam2.LoadRectifyRightCamInfo(LeftRight, RectifyCalib2RightCamPath);
-
+                /// The intrinsic and distortion matrix of camera should use the one calculated by stereo calibration ///
+//                StereoCam32R.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+//                StereoCam32R.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
                 ////  Stereo Camera Calibration  /////
-                StereoCam3Cam2.StereoCalibration(CircleBoard, 15, CaputureImgs);
+                StereoCam32R.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
         }
             break;
@@ -314,37 +302,33 @@ int main()
         case 6:
         {
             /// Calib Cam1 to Cam3 ///
-            CamSys Calib3Cam1R(cam, CamName1R, ImageWidth, ImageHeight, ExposureTimeLeftCam, MaxExposureTime,
-                               CalibrateImgPathCalib3Cam1, ImgFormat);    ///initialize camera1
-            CamSys Calib3Cam3R(cam, CamName3R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
-                               CalibrateImgPathCalib3Cam3, ImgFormat);    ///initialize camera3
-            Calib3Cam1R.Initialize();
-            Calib3Cam3R.Initialize();
-
-            StereoSystem StereoCam1Cam3(&Calib3Cam1R, &Calib3Cam3R, StereoCalibrateImgPathCam1to3,
+            CamSys Cam13R_1R(cam, CamName1R, ImageWidth, ImageHeight, ExposureTimeLeftCam, MaxExposureTime,
+                               CalibrateImgPathCam1to3_1, ImgFormat);    ///initialize camera1
+            CamSys Cam13R_3R(cam, CamName3R, ImageWidth, ImageHeight, ExposureTimeRightCam, MaxExposureTime,
+                               CalibrateImgPathCam1to3_3, ImgFormat);    ///initialize camera3
+            Cam13R_1R.Initialize();
+            Cam13R_3R.Initialize();
+            /// LeftRight: 3->1   RightLeft: 1->3 ///
+            StereoSystem StereoCam13R(&Cam13R_1R, &Cam13R_3R, StereoCalibrateImgPathCam1to3,
                                         StereoMatchingImgPathCam1to3, ImgFormat,
                                         MaxSADWindowSize, MaxValForMinDist, MaxWorkingRange, MaxTextureThreshold);
             if (DoCamerCalibration)
             {
                 if (CaputureImgs)
                 {
-                    bool ChangeDirection = StereoCam1Cam3.SelectCamDirection();
+                    bool ChangeDirection = StereoCam13R.SelectCamDirection();
                     if (ChangeDirection) {
                         std::cout << "Need To Change Camera Position!!!" << std::endl;
                         exit(0);
                     }
                     //////////// adjust focus ////////////
-                    StereoCam1Cam3.AdjustCameraFocus();
+                    StereoCam13R.AdjustCameraFocus();
                 }
                 ////  Single Camera Calibration  /////
-//                StereoCam1Cam3.CamLeft->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
-//                StereoCam1Cam3.CamRight->CalibrateCamera(CircleBoard, 15, !CaputureImgs);
-
-                StereoCam1Cam3.LoadRectifyLeftCamInfo(LeftRight, RectifyCalib3LeftCamPath);
-                StereoCam1Cam3.LoadRectifyRightCamInfo(LeftRight, RectifyCalib3RightCamPath);
-
+                StereoCam13R.CamLeft->CalibrateCamera(CircleBoard, 15, CaputureImgs);
+                StereoCam13R.CamRight->CalibrateCamera(CircleBoard, 15, CaputureImgs);
                 ////  Stereo Camera Calibration  /////
-                StereoCam1Cam3.StereoCalibration(CircleBoard, 15, CaputureImgs);
+                StereoCam13R.StereoCalibration(CircleBoard, 15, CaputureImgs);
             }
         }
             break;

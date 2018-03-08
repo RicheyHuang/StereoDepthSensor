@@ -6,8 +6,9 @@
 #include "opencv2/opencv.hpp"
 #include <fcntl.h>
 #include <linux/fb.h>
-#include<sys/ioctl.h>
-
+#include <sys/ioctl.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
 
 void DrawPoints(cv::Mat Img,cv::vector<cv::Point> Points);
 void DrawPoints(cv::Mat Img,cv::vector<cv::Point2f> Points);
@@ -41,3 +42,7 @@ void saveXmlFile(cv::Mat Matrix,std::string Name,std::string Format,std::string 
 void loadXmlFile(cv::Mat& Matrix,std::string Name,std::string Format,std::string path);
 
 void saveXYZ(std::string filenameString,const cv::Mat& mat);
+
+void savePCD(std::string filename, const cv::Mat& mat);
+
+void savePLY(std::string filename, const cv::Mat& mat);

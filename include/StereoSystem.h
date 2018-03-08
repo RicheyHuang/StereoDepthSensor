@@ -59,8 +59,6 @@ public:
     bool SelectCamDirection();
     void AdjustCameraFocus();
     void StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool CaputureImgs);
-    void LoadRectifyLeftCamInfo(bool LeftRight, std::string ImgPath);
-    void LoadRectifyRightCamInfo(bool LeftRight, std::string ImgPath);
     void LoadStereoCamInfo(bool LeftRight);
     void RectifyPreview();
     void Compute3DMap(int* WorkingDist,bool LeftRight,bool DebugMode, int SADWindowSize, int TextureThreshold);
