@@ -64,6 +64,7 @@ public:
 public:
     StereoSystem(CamSys* CamLeft,CamSys* CamRight,std::string ImgPath,std::string ImgPathMatch,std::string ImgFormat,
                  int MaxSADWindowSize, int MaxValForMinDist, int MaxWorkingRange, int MaxTextureThreshold, int MaxUniquenessRatio);
+    StereoSystem();
     bool SelectCamDirection();
     void AdjustCameraFocus();
     void StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool CaputureImgs);

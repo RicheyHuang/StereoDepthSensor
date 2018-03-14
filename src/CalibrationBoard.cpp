@@ -14,6 +14,8 @@ CalibrationBoard::CalibrationBoard(int PointsCols,int PointsRows,float CircleDis
     CalibrationBoard::GetObjVec();
 }
 
+CalibrationBoard::CalibrationBoard() {};
+
 bool CalibrationBoard::ExtractBoardCoordinate(cv::Mat Img,cv::Point2f& BoardMarker,cv::vector<cv::Point2f>& CirclePointsSort)
 {
     cv::vector<cv::vector<cv::Point>> contours;

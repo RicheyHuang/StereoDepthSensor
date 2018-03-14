@@ -13,12 +13,15 @@ include_directories(${PCL_INCLUDE_DIRS} include)
 add_definitions(${PCL_DEFINITIONS})
 
 set(SOURCE_FILES
-        src/CalibrateCamera.cpp
+        src/main.cpp
         src/CalibrationBoard.cpp
         src/Camera.cpp
         src/CamSys.cpp
         src/StereoSystem.cpp
-        src/ToolBox.cpp src/ShowImgGui.cpp include/ShowImgGui.h)
+        src/ToolBox.cpp
+        src/ShowImgGui.cpp
+        include/ShowImgGui.h
+        include/Configuration.hpp)
 
 add_executable(StereoDepthSensor ${SOURCE_FILES})
 target_link_libraries (StereoDepthSensor MVSDK  ${OpenCV_LIBS} ${PCL_LIBRARIES} python3.4m)

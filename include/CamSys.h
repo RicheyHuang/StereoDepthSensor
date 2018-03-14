@@ -22,6 +22,7 @@ public:
 
 public:
     CamSys(Camera* cam,char* CamName,int width,int height,int ExposureTime, int MaxExposureTime, std::string ImgPath,std::string ImgFormat);
+    CamSys();
     void Initialize();
     void PreviewImage();
     void Trigger();

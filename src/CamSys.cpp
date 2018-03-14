@@ -11,6 +11,8 @@ CamSys::CamSys(Camera* cam,char* CamName,int width,int height,int ExposureTime, 
 
 }
 
+CamSys::CamSys(){}
+
 void CamSys::Initialize()
 {
     std::cout<<"Initializing Camera "<<CamName<<std::endl;
@@ -111,7 +113,7 @@ void CamSys::CalibrateCamera(CalibrationBoard CircleBoard,int CaliImgNum,bool Ca
                 break;
             }
 
-            if ((key & 255) == 99)      /////  c
+            if ((key & 255) == 99)         /////  c
             {
                 std::cout<<"Start detect Camera "+CamNameSave+ " Calibration Board No."<<success<<std::endl;
                 BoardFound=CircleBoard.ExtractBoardCoordinate(frame,BoardMarker,Corners);
@@ -134,9 +136,9 @@ void CamSys::CalibrateCamera(CalibrationBoard CircleBoard,int CaliImgNum,bool Ca
                     cv::imshow(DetectWindow,frameClr);
                     std::cout<<"If the detection is right,input 'Enter' to save data,else input other key"<<std::endl;
                     key = cv::waitKey(0);
-                    if (((key&255) == 10)||((key&255) == 141))            /////////////////// Enter
+                    if (((key&255) == 13))            /////////////////// Enter
                     {
-                        saveMat(frame,ImgPath+CamName+"_",success,ImgFormat);  //+"CalibrateImages_"
+                        saveMat(frame,ImgPath+CamName+"_",success,ImgFormat);
                         saveMat(frameClr,ImgPath+CamNameSave+"_Draw_",success,ImgFormat);
                         std::cout<<"Saving this image,press 'c' to capture another one..."<<std::endl;
                         ImgVectorAll.push_back(Corners);
@@ -162,7 +164,7 @@ void CamSys::CalibrateCamera(CalibrationBoard CircleBoard,int CaliImgNum,bool Ca
             ////
             BoardFound=CircleBoard.ExtractBoardCoordinate(frame,BoardMarker,Corners);
             if (BoardFound==false)
-            {	std::cout<<CamNameSave+" Image No."<<success<<" can not find a calibration board!!!!!"<<std::endl;}
+            {	std::cout<<CamNameSave+" Image No."<<success<<" Cannot find a calibration board!!!!!"<<std::endl;}
             else
             {
                 if (frame.channels()==1)
@@ -175,7 +177,6 @@ void CamSys::CalibrateCamera(CalibrationBoard CircleBoard,int CaliImgNum,bool Ca
                 }
                 cv::drawChessboardCorners(frameClr, CircleBoard.BoardSize, Corners,BoardFound);
                 cv::circle(frameClr,BoardMarker,1,cv::Scalar(0,0,255),3,8,0);
-                //cv::imshow("Calibration Board points detected",frameClr);
                 cv::imshow(DetectWindow,frameClr);
                 cv::waitKey(500);
                 std::cout<<"Saving the coordinates..."<<std::endl;
@@ -190,25 +191,20 @@ void CamSys::CalibrateCamera(CalibrationBoard CircleBoard,int CaliImgNum,bool Ca
     cv::destroyWindow(DetectWindow);
 
     int CamCalibFlags = CV_CALIB_FIX_K3;
-    //std::cout<<ObjVectorAll[0]<<std::endl;
-    //std::cout<<ImgVectorAll[0]<<std::endl;
-    //std::cout<<"before calib type: "<<this->intrinsicMatrix.type()<<std::endl;
     double CamCalibErr=cv::calibrateCamera(ObjVectorAll,ImgVectorAll,cv::Size(frame.cols,frame.rows),intrinsicMatrix,distortionMatrix,rvecs,tvecs,CamCalibFlags);
 
-    ////
-    //std::cout<<"before calib type: "<<this->intrinsicMatrix.type()<<std::endl;
-    std::cout<<"camera "<<CamName<< " calibrated!"<<std::endl;
-    std::cout << "done with RMS error=" << CamCalibErr << std::endl;
-    //std::cout<<"Camera.intrinsicMatrix:"<<intrinsicMatrix<<std::endl;
-    saveXmlFile(intrinsicMatrix,"IntrinsicMatrix"+CamNameSave,".xml",ImgPath);
-    saveXmlFile(distortionMatrix,"DistortionMatrix"+CamNameSave,".xml",ImgPath);
+    std::cout<<"Camera "<<CamName<< " calibrated!"<<std::endl;
+    std::cout << "Done with RMS error=" << CamCalibErr << std::endl;
 
+    saveXmlFile(intrinsicMatrix,"A_"+CamNameSave,".xml",ImgPath);
+    saveXmlFile(distortionMatrix,"D_"+CamNameSave,".xml",ImgPath);
 }
 
 void CamSys::LoadCamInfo()
 {
     std::string CamNameSave = std::string(CamName);
 
-    loadXmlFile(intrinsicMatrix,"IntrinsicMatrix"+CamNameSave,".xml",ImgPath);
-    loadXmlFile(distortionMatrix,"DistortionMatrix"+CamNameSave,".xml",ImgPath);
+    loadXmlFile(intrinsicMatrix,"A_"+CamNameSave,".xml",ImgPath);
+    loadXmlFile(distortionMatrix,"D_"+CamNameSave,".xml",ImgPath);
+
 }

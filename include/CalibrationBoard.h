@@ -49,6 +49,7 @@ class CalibrationBoard
     bool ExtractBoardCoordinate(cv::Mat Img,cv::Point2f& CornerCentroid,cv::vector<cv::Point2f>& CirclePointsSort);
 
     CalibrationBoard(int PointsCols,int PointsRows,float CircleDistWidth,float CircleDistHeight,float BoardWidth,float BoardHeight,float CircleDiameter);
+    CalibrationBoard();
     //cv::Mat GenerateChessboard(int offset_cols, int offset_rows,int resolution_x, int resolution_y);
     void GetObjVec();
     bool FindCalibrationBoard(cv::Mat Img,cv::vector<cv::vector<cv::Point>>& contours,cv::vector<cv::Vec4i>& hierarchy,int& idxson,cv::vector<cv::Point2f>& CircleCoordinate,int& i,int StartTh,int& UsedTh);
