@@ -10,15 +10,13 @@
 
 int main()
 {
-    bool CoordinateSystem = ReferentialCamSystem(RightCamera);
-
+    /// Using Right Camera as reference ///
     std::string            Path_ConfigFile = "..//Calibration//Configuration//CamGroup1_Config.yaml";
     ParameterConfiguration ConfigFile(Path_ConfigFile);
     ConfigFile.Configure();
-    DepthSensor            DepthCam(CoordinateSystem, ConfigFile);
+    DepthSensor            DepthCam(ConfigFile);
     DepthCam.Initialize();
     DepthCam.Calibrate();
     DepthCam.Run();
-
     return 0;
 }

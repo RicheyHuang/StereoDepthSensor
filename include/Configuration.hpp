@@ -36,7 +36,6 @@ struct CameraProperties
 struct CalibrationParameters
 {
     std::string DoOpenCamera;
-    std::string IsDebugMode;
     std::string DoCalibration;
     std::string DoCaptureImage;
     int  ImageNum;
@@ -52,13 +51,6 @@ struct CalibrationBoardParameters
     float BoardWidth;
     float BoardHeight;
 };
-
-enum ReferentialCamSystem
-{
-    RightCamera,
-    LeftCamera
-};
-
 
 class ParameterConfiguration
 {
@@ -128,7 +120,6 @@ public:
     {
         cv::FileStorage File(m_Path_ConfigFile, cv::FileStorage::READ);
         File["DoOpenCamera"]   >> m_CalibParams.DoOpenCamera;
-        File["IsDebugMode"]    >> m_CalibParams.IsDebugMode;
         File["DoCalibration"]  >> m_CalibParams.DoCalibration;
         File["DoCaptureImage"] >> m_CalibParams.DoCaptureImage;
         File["ImageNum"]       >> m_CalibParams.ImageNum;
@@ -148,7 +139,6 @@ public:
 class DepthSensor
 {
 public:
-    bool                   m_RefSys          = ReferentialCamSystem(LeftCamera);
     Camera*                m_Cam             = nullptr;
     ParameterConfiguration m_ParamsConfig    = ParameterConfiguration();
     CamSys                 m_LeftCam         = CamSys();
@@ -165,16 +155,14 @@ public:
     bool                   m_DoCaptureImage;
     
 
-    DepthSensor(const bool RefSys, const ParameterConfiguration& ParamsConfig)
+    DepthSensor(const ParameterConfiguration& ParamsConfig)
     {
-        m_RefSys       = RefSys;
         m_ParamsConfig = ParamsConfig;
     };
 
     void Initialize()
     {
         std::istringstream(m_ParamsConfig.m_CalibParams.DoOpenCamera) >> std::boolalpha >> m_DoOpenCamera;
-        std::istringstream(m_ParamsConfig.m_CalibParams.IsDebugMode) >> std::boolalpha >> m_IsDebugMode;
         std::istringstream(m_ParamsConfig.m_CalibParams.DoCalibration) >> std::boolalpha >> m_DoCalibration;
         std::istringstream(m_ParamsConfig.m_CalibParams.DoCaptureImage) >> std::boolalpha >> m_DoCaptureImage;
 
@@ -259,13 +247,11 @@ public:
 
     void Run()
     {
-        m_StereoCam.LoadStereoCamInfo(m_RefSys);
+        m_StereoCam.LoadStereoCamInfo();
 
         m_WorkingDistance[0] = m_ParamsConfig.m_CamParams.MinDistance;
         m_WorkingDistance[1] = m_ParamsConfig.m_CamParams.MinDistance + m_ParamsConfig.m_CamParams.WorkingRange;
         m_StereoCam.Compute3DMap(m_WorkingDistance,
-                                 m_RefSys,
-                                 m_IsDebugMode,
                                  m_ParamsConfig.m_CamParams.BlockSize,
                                  m_ParamsConfig.m_CamParams.TextureThreshold);
     };

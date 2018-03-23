@@ -1,0 +1,36 @@
+%YAML:1.0
+ImageWidth: 1280
+ImageHeight: 720
+LeftCamExposureTime: 18000
+RightCamExposureTime: 18000
+BlockSize: 17
+MinDistance: 330
+WorkingRange: 80
+MaxExposureTime: 50000
+MaxBlockSize: 99
+MaxValForMinDistance: 500
+MaxWorkingRange: 200
+TextureThreshold: 5000
+MaxTextureThreshold: 10000
+MaxUniquenessRatio: 99
+
+LeftCamName: "Cam3"
+RightCamName: "Cam14"
+LeftCamCalibrationFilesPath: "..//Calibration//Test//CalibrateLeft//"
+RightCamCalibrationFilesPath: "..//Calibration//Test//CalibrateRight//"
+StereoCalibrationFilesPath: "..//Calibration//Test//CalibrateStereo//"
+DepthImageFilePath: "..//Calibration//Test//DepthMapCapture//"
+ImageSavedFormat: ".png"
+
+DoOpenCamera: true
+IsDebugMode: false
+DoCaptureImage: false
+ImageNum: 15
+
+PointsCols: 7
+PointsRows: 7
+CircleDistanceWidth: 4
+CircleDistanceHeight: 4
+CircleDiameter: 2
+BoardWidth: 36
+BoardHeight: 36

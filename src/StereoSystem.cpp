@@ -54,7 +54,6 @@ void StereoSystem::AdjustRightCamExposure(int UpdatedExposureTime, void *)
     CamRight->cam->SetExposureTime(CamRight->CamHandle, UpdatedExposureTime);
 };
 
-
 void StereoSystem::onChangeSADWinSize(int SADWindowsSize, void *ptr)
 {
     StereoSystem *winsize = (StereoSystem*) ptr;
@@ -114,14 +113,6 @@ void StereoSystem::UpdateMinDist(int MinDist, void*)
     int mindisp = disp1;
     bm->setMinDisparity(mindisp-xd);
     bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-
-//    int disp1 = -PR.at<double>(0,3)/WorkingDistance[0];
-//    int disp2 = -PR.at<double>(0,3)/WorkingDistance[1];
-//    int xd = PR.at<double>(0,2)-PL.at<double>(0,2);
-//    int mindisp = disp1;
-//    bm->setMinDisparity(mindisp+xd);
-//    bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-
     DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
 
 }
@@ -137,14 +128,6 @@ void StereoSystem::UpdateWorkingRange(int WorkingRange, void*)
     int mindisp = disp1;
     bm->setMinDisparity(mindisp-xd);
     bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-
-//    int disp1 = -PR.at<double>(0,3)/WorkingDistance[0];
-//    int disp2 = -PR.at<double>(0,3)/WorkingDistance[1];
-//    int xd = PR.at<double>(0,2)-PL.at<double>(0,2);
-//    int mindisp = disp1;
-//    bm->setMinDisparity(mindisp+xd);
-//    bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-
     DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
 
 }
@@ -426,51 +409,18 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
     cv::Rect validRoiLeft;
     cv::Rect validRoiRight;
 
-   /////////////////////////////////   Left Right Stereo ////////////////////////////////////
-    std::cout << "...Using Image Points To Compute Stereo Camera Calibration..." << std::endl;
-    double CaliError = cv::stereoCalibrate(ObjVectorAll, CamLeftCornersAll, CamRightCornersAll, CamLeft->intrinsicMatrix, CamLeft->distortionMatrix, CamRight->intrinsicMatrix, CamRight->distortionMatrix,
-                                           ImgSize, R, T, E, F, CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 100, 1e-6));
-    std::cout << "Done with RMS error=" << CaliError << std::endl;
-
-    ////////////////   ComputeStereoRectifyMatrix
-
-    ////////////////   The unit of StereoCamLR.T is mm /////////////
-    cv::stereoRectify(CamLeft->intrinsicMatrix, CamLeft->distortionMatrix, CamRight->intrinsicMatrix, CamRight->distortionMatrix,
-                      ImgSize, R, T, RL, RR, PL, PR, Q, CV_CALIB_ZERO_DISPARITY, -1, ImgSize, &validRoiLeft,&validRoiRight);    //   cv::CALIB_ZERO_DISPARITY  ???
-    ////// save calibration data //////
-    std::string ImgPathLeftRight = ImgPath+"RightToLeft//";
-    saveXmlFile(CamLeft->intrinsicMatrix,"A_"+CamNameLeftSave,".xml",ImgPathLeftRight);
-    saveXmlFile(CamLeft->distortionMatrix,"D_"+CamNameLeftSave,".xml",ImgPathLeftRight);
-
-    saveXmlFile(CamRight->intrinsicMatrix,"A_"+CamNameRightSave,".xml",ImgPathLeftRight);
-    saveXmlFile(CamRight->distortionMatrix,"D_"+CamNameRightSave,".xml",ImgPathLeftRight);
-
-    saveXmlFile(R,"R",".xml",ImgPathLeftRight);
-    saveXmlFile(T,"T",".xml",ImgPathLeftRight);
-    saveXmlFile(E,"E",".xml",ImgPathLeftRight);
-    saveXmlFile(F,"F",".xml",ImgPathLeftRight);
-
-    saveXmlFile(RL,"RL",".xml",ImgPathLeftRight);
-    saveXmlFile(RR,"RR",".xml",ImgPathLeftRight);
-
-    saveXmlFile(PL,"PL",".xml",ImgPathLeftRight);
-    saveXmlFile(PR,"PR",".xml",ImgPathLeftRight);
-
-    saveXmlFile(Q,"Q",".xml",ImgPathLeftRight);
-
-
-    /////////////////////////////////   Right Left Stereo ////////////////////////////////////
     std::cout<<"...Using Image Points To Compute Stereo Camera Calibration..."<<std::endl;
-    CaliError = cv::stereoCalibrate(ObjVectorAll,CamRightCornersAll,CamLeftCornersAll,CamRight->intrinsicMatrix,CamRight->distortionMatrix,CamLeft->intrinsicMatrix,CamLeft->distortionMatrix,
+    double CaliError = cv::stereoCalibrate(ObjVectorAll,CamRightCornersAll,CamLeftCornersAll,CamRight->intrinsicMatrix,CamRight->distortionMatrix,CamLeft->intrinsicMatrix,CamLeft->distortionMatrix,
                                            ImgSize,R,T,E,F,CV_CALIB_USE_INTRINSIC_GUESS, cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-6));
     std::cout << "done with RMS error=" <<CaliError<< std::endl;
 
-    ////////////////   ComputeStereoRectifyMatrix
-    ////////////////   The unit of StereoCamLR.T is mm /////////////
+    ///   ComputeStereoRectifyMatrix  ///
+    ///   The unit of StereoCamLR.T is mm  ///
     cv::stereoRectify(CamRight->intrinsicMatrix,CamRight->distortionMatrix,CamLeft->intrinsicMatrix,CamLeft->distortionMatrix,
                       ImgSize,R,T, RR, RL, PR,PL, Q, CV_CALIB_ZERO_DISPARITY, -1, ImgSize,&validRoiRight,&validRoiLeft);
-    ////// save calibration data //////
-    std::string ImgPathRightLeft = ImgPath+"LeftToRight//";
+
+    ///  save calibration data  ///
+    std::string ImgPathRightLeft = ImgPath+"RightToLeft//";
     saveXmlFile(CamLeft->intrinsicMatrix,"A_"+CamNameLeftSave,".xml",ImgPathRightLeft);
     saveXmlFile(CamLeft->distortionMatrix,"D_"+CamNameLeftSave,".xml",ImgPathRightLeft);
 
@@ -492,16 +442,13 @@ void StereoSystem::StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool 
 }
 
 
-void StereoSystem::LoadStereoCamInfo(bool LeftRight)
+void StereoSystem::LoadStereoCamInfo()
 {
     std::string CamNameLeftSave = std::string(CamLeft->CamName);
     std::string CamNameRightSave = std::string(CamRight->CamName);
     std::string PathLoad ;
 
-    if (LeftRight)
-    {PathLoad = ImgPath+"RightToLeft//";}
-    else
-    {PathLoad = ImgPath+"LeftToRight//";}
+    PathLoad = ImgPath+"RightToLeft//";
 
     loadXmlFile(CamLeft->intrinsicMatrix,"A_"+CamNameLeftSave,".xml",PathLoad);
     loadXmlFile(CamLeft->distortionMatrix,"D_"+CamNameLeftSave,".xml",PathLoad);
@@ -557,7 +504,7 @@ void StereoSystem::RectifyPreview()
 }
 
 
-void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode, int SADWindowSize, int TextureThreshold)
+void StereoSystem::Compute3DMap(int* WorkingDist, int SADWindowSize, int TextureThreshold)
 {
     WorkingDistance[0] = WorkingDist[0];
     WorkingDistance[1] = WorkingDist[1];
@@ -566,7 +513,7 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
     cv::initUndistortRectifyMap(CamLeft->intrinsicMatrix,CamLeft->distortionMatrix, RL,PL,ImgSize, CV_16SC2, ReMapLeftX,ReMapLeftY);
     cv::initUndistortRectifyMap(CamRight->intrinsicMatrix,CamRight->distortionMatrix, RR, PR,ImgSize, CV_16SC2,ReMapRightX,ReMapRightY);
 
-    /////////// block matching parameters ///////
+    ///  block matching parameters  ///
 
     blockSize = SADWindowSize;
     textureThreshold = TextureThreshold;
@@ -577,29 +524,14 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
     bm->setUniquenessRatio(uniquenessRatio);
     bm->setDisp12MaxDiff(-1);
 
-    if (LeftRight)
-    {
-        /// convert the abstract variable to have a realistic meaning ///
-        int disp1 = -PR.at<double>(0,3)/WorkingDistance[0];
-        int disp2 = -PR.at<double>(0,3)/WorkingDistance[1];
-        int xd = PR.at<double>(0,2)-PL.at<double>(0,2);
-        int mindisp = disp1;
-        bm->setMinDisparity(mindisp+xd);
-        bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-    }
-    else
-    {
-        int disp1 = -PL.at<double>(0,3)/WorkingDistance[0];
-        int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
-        int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
-        int mindisp = disp1;
-        bm->setMinDisparity(mindisp-xd);
-        bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
-    }
-
+    int disp1 = -PL.at<double>(0,3)/WorkingDistance[0];
+    int disp2 = -PL.at<double>(0,3)/WorkingDistance[1];
+    int xd = PL.at<double>(0,2)-PR.at<double>(0,2);
+    int mindisp = disp1;
+    bm->setMinDisparity(mindisp-xd);
+    bm->setNumDisparities((int((abs(disp1-disp2)+15)/16))*16);
 
     DepthMapSize = cv::Size(ImgSize.width+bm->getMinDisparity(),ImgSize.height);
-//    cv::Size DepthMapSizeResize = DepthMapSize;
     HandleLeft = std::string(CamLeft->CamName);
     HandleRight = std::string(CamRight->CamName);
     HandleDepthMap = "DepthMap";
@@ -617,25 +549,19 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
 
     while(true)
     {
-        if (DebugMode)
-        {
-            CamLeft->frame = cv::imread(ImgPathMatch + "Left.png", -1);
-            CamRight->frame = cv::imread(ImgPathMatch + "Right.png", -1);
-        }
-        else
-        {
-            CamLeft->Trigger();
-            CamRight->Trigger();
 
-            CamLeft->CapImage();
-            CamRight->CapImage();
+        CamLeft->Trigger();
+        CamRight->Trigger();
 
-            if ((CamLeft->frame.data==NULL)||(CamRight->frame.data==NULL))
-            {
-                GetImgError = true;
-                std::cout<<"Can not get image from camera!!"<<std::endl;
-            }
+        CamLeft->CapImage();
+        CamRight->CapImage();
+
+        if ((CamLeft->frame.data==NULL)||(CamRight->frame.data==NULL))
+        {
+            GetImgError = true;
+            std::cout<<"Can not get image from camera!!"<<std::endl;
         }
+
 
         if (!GetImgError)
         {
@@ -645,13 +571,7 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
             ShowImgGui(HandleLeft, RectifyLeft);
             ShowImgGui(HandleRight, RectifyRight);
 
-            if (LeftRight)
-            {
-                bm->compute(RectifyLeft, RectifyRight, dispsbm);
-            } else
-            {
-                bm->compute(RectifyRight, RectifyLeft, dispsbm);
-            }
+            bm->compute(RectifyRight, RectifyLeft, dispsbm);
 
             dispsbm = dispsbm(cv::Rect(0, 0, DepthMapSize.width, DepthMapSize.height));
             cv::minMaxLoc(dispsbm, &minVal, &maxVal, NULL, NULL);
@@ -673,6 +593,7 @@ void StereoSystem::Compute3DMap(int* WorkingDist, bool LeftRight, bool DebugMode
                 cv::imwrite(ImgPathMatch + "Right" + ImgFormat, CamRight->frame);
                 cv::imwrite(ImgPathMatch + "LeftRectify" + ImgFormat, RectifyLeft);
                 cv::imwrite(ImgPathMatch + "RightRectify" + ImgFormat, RectifyRight);
+                cv::imwrite(ImgPathMatch + "DepthMap" + ImgFormat, dispsbm8);
                 saveXYZ(ImgPathMatch + "DepthMap.WRL", Pts3D);
                 savePLY(ImgPathMatch + "PointCloud.ply", Pts3D);
                 savePCD(ImgPathMatch + "PointCloud.pcd", Pts3D);

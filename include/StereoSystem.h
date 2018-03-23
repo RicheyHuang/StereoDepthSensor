@@ -68,9 +68,9 @@ public:
     bool SelectCamDirection();
     void AdjustCameraFocus();
     void StereoCalibration(CalibrationBoard Board,int CaliImgNum,bool CaputureImgs);
-    void LoadStereoCamInfo(bool LeftRight);
+    void LoadStereoCamInfo();
     void RectifyPreview();
-    void Compute3DMap(int* WorkingDist,bool LeftRight,bool DebugMode, int SADWindowSize, int TextureThreshold);
+    void Compute3DMap(int* WorkingDist, int SADWindowSize, int TextureThreshold);
 
     void AdjustLeftCamExposure(int, void *);
     void AdjustRightCamExposure(int, void *);
