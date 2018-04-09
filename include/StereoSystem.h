@@ -81,5 +81,7 @@ public:
     void UpdateTextureThresh(int TextureThresh, void*);
     void UpdateUniquenessRatio(int UniquenessRatio, void*);
 
+    void DebugMode(CalibrationBoard Board);
+
 };
 

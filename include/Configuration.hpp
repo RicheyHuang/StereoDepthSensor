@@ -214,6 +214,19 @@ public:
                                    m_ParamsConfig.m_CamParams.MaxUniquenessRatio);
     };
 
+    void Debug()
+    {
+        m_CalibBoard = CalibrationBoard(m_ParamsConfig.m_BoardParams.PointsCols,
+                                        m_ParamsConfig.m_BoardParams.PointsRows,
+                                        m_ParamsConfig.m_BoardParams.CircleDistanceWidth,
+                                        m_ParamsConfig.m_BoardParams.CircleDistanceHeight,
+                                        m_ParamsConfig.m_BoardParams.BoardWidth,
+                                        m_ParamsConfig.m_BoardParams.BoardHeight,
+                                        m_ParamsConfig.m_BoardParams.CircleDiameter);
+        m_StereoCam.DebugMode(m_CalibBoard);
+    }
+
+
     void Calibrate()
     {
         m_CalibBoard = CalibrationBoard(m_ParamsConfig.m_BoardParams.PointsCols,

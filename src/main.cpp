@@ -16,7 +16,8 @@ int main()
     ConfigFile.Configure();
     DepthSensor            DepthCam(ConfigFile);
     DepthCam.Initialize();
-    DepthCam.Calibrate();
+//    DepthCam.Debug();
+//    DepthCam.Calibrate();
     DepthCam.Run();
     return 0;
 }

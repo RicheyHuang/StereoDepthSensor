@@ -504,6 +504,89 @@ void StereoSystem::RectifyPreview()
 }
 
 
+void StereoSystem::DebugMode(CalibrationBoard Board)
+{
+    /// if the rectified images of two cameras are not row-aligned, the depth image cannot be correctly reconstructed. ///
+
+    LoadStereoCamInfo();
+    std::string HandleLeft = std::string(CamLeft->CamName);
+    std::string HandleRight = std::string(CamRight->CamName);
+
+    CreateImgWindow(HandleLeft,ImgSize,HandleRight,ImgSize,0.95);
+
+    cv::initUndistortRectifyMap(CamLeft->intrinsicMatrix,CamLeft->distortionMatrix, RL,PL,ImgSize, CV_16SC2, ReMapLeftX,ReMapLeftY);
+    cv::initUndistortRectifyMap(CamRight->intrinsicMatrix,CamRight->distortionMatrix, RR, PR,ImgSize, CV_16SC2,ReMapRightX,ReMapRightY);
+
+    std::cout << "Capture an image of a calibration board and ensure that its corner points can all be detected. " << std::endl;
+
+    int key;
+
+    int KeyPoints = Board.BoardSize.width * Board.BoardSize.height;
+    bool BoardFound = false;
+
+    cv::Point2f BoardMarker;
+    cv::Mat frameClrLeft;
+    cv::Mat frameClrRight;
+    std::vector<cv::Point2f> CamLeftCorners;
+    std::vector<cv::Point2f> CamRightCorners;
+
+    std::vector<float> VerticalDifferences;
+
+    while(true)
+    {
+        CamLeft->Trigger();
+        CamRight->Trigger();
+
+        CamLeft->CapImage();
+        CamRight->CapImage();
+        cv::remap(CamLeft->frame, RectifyLeft, ReMapLeftX, ReMapLeftY, CV_INTER_LINEAR);
+        cv::remap(CamRight->frame, RectifyRight, ReMapRightX,ReMapRightY, CV_INTER_LINEAR);
+        cv::imshow(HandleLeft,RectifyLeft);
+        cv::imshow(HandleRight,RectifyRight);
+        key = cv::waitKey(1);
+        /// Press ESC to exit ///
+        if((key & 255) == 27 )
+        {
+            break;
+        }
+        /// Press C to capture and save image ///
+        if ((key & 255) == 99)
+        {
+            std::cout << "Saving Current Images..." << std::endl;
+            cv::imwrite(ImgPathMatch + "LeftRectifiedPic" + ImgFormat, RectifyLeft);
+            cv::imwrite(ImgPathMatch + "RightRectifiedPic" + ImgFormat, RectifyRight);
+
+            BoardFound=Board.ExtractBoardCoordinate(RectifyLeft,BoardMarker,CamLeftCorners);
+            if (BoardFound==false)
+            {
+                std::cout<< " Cannot find a calibration board! "<<std::endl;
+            }
+
+            BoardFound=Board.ExtractBoardCoordinate(RectifyRight,BoardMarker,CamRightCorners);
+            if (BoardFound==false)
+            {
+                std::cout<< " Cannot find a calibration board! "<<std::endl;
+            }
+
+            for(int i = 0; i < KeyPoints; i++)
+            {
+                VerticalDifferences.push_back(CamLeftCorners.at(i).y - CamRightCorners.at(i).y);
+            }
+
+            double Sum = std::accumulate(std::begin(VerticalDifferences), std::end(VerticalDifferences), 0.0);
+            double Mean =  Sum / VerticalDifferences.size();
+
+            double Accumulation = 0.0;
+            std::for_each(std::begin(VerticalDifferences), std::end(VerticalDifferences),
+                          [&](const double element){ Accumulation += (element-Mean)*(element-Mean); });
+
+            double Stdev = sqrt(Accumulation/(VerticalDifferences.size()));
+
+            std::cout << "The standard deviation in vertical direction is: " << Stdev << std::endl;
+        }
+    }
+}
+
 void StereoSystem::Compute3DMap(int* WorkingDist, int SADWindowSize, int TextureThreshold)
 {
     WorkingDistance[0] = WorkingDist[0];
